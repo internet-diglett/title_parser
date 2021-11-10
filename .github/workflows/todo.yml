@@ -2,8 +2,6 @@ name: Create Issues from TODOs
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 jobs:
