@@ -52,6 +52,14 @@ pub trait CueTrait {
 }
 
 impl CueTrait for str {
+    // TODO Cue generation needs to account for optional cue identifier
+    //
+    // #### Summary
+    // Cues can have an optional cue identifier followed by a newline.
+    // These are currenly not accounted for when converting strings to Cues.
+    // #### Requirements
+    // - [ ] cue can be processed without cue identifier
+    // - [ ] cue can be processed with cue identifier
     fn to_cue(&self) -> Result<Cue, String> {
         let lines: Vec<&str> = self.trim().split('\n').into_iter().collect();
         let (start, end) =
