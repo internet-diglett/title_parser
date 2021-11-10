@@ -1,0 +1,16 @@
+name: Create Issues from TODOs
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  generate_issues:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: TODO to Issue
+        uses: internet-diglett/todo-to-issue-action@temp
