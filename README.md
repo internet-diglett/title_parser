@@ -21,7 +21,7 @@ Add crate to your `Cargo.toml`
 
 ```toml
 [dependencies]
-title_parser = "0.1.1"
+title_parser = "0.1.2"
 ```
 
 To parse a cue, such as:
