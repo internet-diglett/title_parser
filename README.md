@@ -1,7 +1,6 @@
 # title_parser
 
 [![Rust](https://github.com/internet-diglett/title_parser/actions/workflows/rust.yml/badge.svg)](https://github.com/internet-diglett/title_parser/actions/workflows/rust.yml)
-
 [![Publish in Crate Package Registry](https://github.com/internet-diglett/title_parser/actions/workflows/crate.yml/badge.svg)](https://github.com/internet-diglett/title_parser/actions/workflows/crate.yml)
 
 Rust library for extracting plain text from SRT and WebVTT Subtitle Cues.
@@ -76,11 +75,6 @@ Add additional notes to deploy this on a live system
 
   - [Contributor Covenant](https://www.contributor-covenant.org/) - Used
     for the Code of Conduct
-
-## Contributing
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code
-of conduct, and the process for submitting pull requests to us.
 
 ## Versioning
 
