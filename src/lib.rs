@@ -6,7 +6,7 @@
 //! from text that conforms to SRT or WebVTT standards
 
 pub mod timecode;
-use regex::Regex;
+use regex::{Captures, Regex};
 use timecode::{TimeCode, TimeCodeTrait};
 // use std::{error, fs};
 
@@ -35,6 +35,7 @@ pub trait CueTrait {
     /// Attempts to create a cue from a string
     ///
     /// ```vtt
+    /// 1 - Cue Identifier
     /// 00:01:14.815 --> 00:01:18.114
     /// - I'm text for a cue
     /// - Me too!
@@ -43,8 +44,13 @@ pub trait CueTrait {
     /// ```
     /// use title_parser::{CueTrait};
     ///
-    /// let text = "00:01:14.815 --> 00:01:18.114\n- I'm text for a cue\n- Me too!";
+    /// // with cue identifier
+    /// let text = "1 - Cue\n00:01:14.815 --> 00:01:18.114\n- I'm text for a cue\n- Me too!";
+    /// let cue = text.to_cue().unwrap();
+    /// assert_eq!(cue.text, "I'm text for a cue\nMe too!");
     ///
+    /// // without cue identifier
+    /// let text = "00:01:14.815 --> 00:01:18.114\n- I'm text for a cue\n- Me too!";
     /// let cue = text.to_cue().unwrap();
     /// assert_eq!(cue.text, "I'm text for a cue\nMe too!");
     /// ```
@@ -52,35 +58,26 @@ pub trait CueTrait {
 }
 
 impl CueTrait for str {
-    // TODO Cue generation needs to account for optional cue identifier
-    //
-    // #### Summary
-    // Cues can have an optional cue identifier followed by a newline.
-    // These are currenly not accounted for when converting strings to Cues.
-    // #### Requirements
-    // - [ ] cue can be processed without cue identifier
-    // - [ ] cue can be processed with cue identifier
     fn to_cue(&self) -> Result<Cue, String> {
-        let lines: Vec<&str> = self.trim().split('\n').into_iter().collect();
-        let (start, end) =
-            generate_timecodes(lines[0]).ok_or_else(|| "not a valid cue".to_string())?;
-        let cue_lines: Vec<&str> = lines[1..].to_vec();
-        let clean_lines: Vec<String> = cue_lines.iter().map(|i| sanitize_text(i)).collect();
-        Ok(Cue {
-            start,
-            end,
-            text: clean_lines.join("\n"),
-        })
+        let re = Regex::new(r"(.+\n)?(([0-9:\.,]{9,}) --> ([0-9:\.,]{9,})( .*)?)((\n.*)+)")
+            .expect("failed to compile regex");
+        let caps = re
+            .captures(self)
+            .ok_or_else(|| "not a valid cue".to_string())?;
+        println!("{:?}", caps);
+        let cues = caps.get(6).unwrap().as_str();
+        let (start, end) = generate_timecodes(caps).ok_or_else(|| "not a valid cue".to_string())?;
+        let lines: Vec<&str> = cues.trim().split('\n').into_iter().collect();
+        let clean_lines: Vec<String> = lines.iter().map(|i| sanitize_text(i)).collect();
+        let text = clean_lines.join("\n");
+        Ok(Cue { start, end, text })
     }
 }
 
 // Attempts to extract TimeCodes from input, ignores css formatting text
-fn generate_timecodes(input: &str) -> Option<(TimeCode, TimeCode)> {
-    let re = Regex::new(r"^([0-9:\.,]{9,}) --> ([0-9:\.,]{9,})( .*)?$")
-        .expect("failed to compile regex");
-    let caps = re.captures(input)?;
-    let start = caps.get(1)?.as_str().to_timecode().ok()?;
-    let end = caps.get(2)?.as_str().to_timecode().ok()?;
+fn generate_timecodes(caps: Captures) -> Option<(TimeCode, TimeCode)> {
+    let start = caps.get(3)?.as_str().to_timecode().ok()?;
+    let end = caps.get(4)?.as_str().to_timecode().ok()?;
     Some((start, end))
 }
 
@@ -104,14 +101,6 @@ fn sanitize_text(input: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn private_generate_timecodes() -> Result<(), String> {
-        let input = "00:00:13.916 --> 00:00:16.500 position:50.00%,middle align:middle";
-        let expected = ("00:00:13.916".to_timecode()?, "00:00:16.500".to_timecode()?);
-        assert_eq!(generate_timecodes(input), Some(expected));
-        Ok(())
-    }
 
     #[test]
     fn private_sanitize_text() -> Result<(), String> {
