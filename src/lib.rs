@@ -64,7 +64,6 @@ impl CueTrait for str {
         let caps = re
             .captures(self)
             .ok_or_else(|| "not a valid cue".to_string())?;
-        println!("{:?}", caps);
         let cues = caps.get(6).unwrap().as_str();
         let (start, end) = generate_timecodes(caps).ok_or_else(|| "not a valid cue".to_string())?;
         let lines: Vec<&str> = cues.trim().split('\n').into_iter().collect();
